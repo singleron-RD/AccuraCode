@@ -1,6 +1,6 @@
 
 # AccuraCode
-AccuraCode is a bioinfomatics analysis pipeline developed at Singleron to process AccuraCode sequencing data. These pipelines take paired-end FASTQ files as input and generate output files which can be used for downstream data analysis.
+AccuraCode is a bioinfomatics analysis pipeline developed at Singleron to process AccuraCode sequencing data. This pipeline takes paired-end FASTQ files as input and generates output files which can be used for downstream data analysis.
 
 Detailed docs can be found in [manual](./docs/manual.md).
 
