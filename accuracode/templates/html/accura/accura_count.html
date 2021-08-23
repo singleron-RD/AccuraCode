@@ -1,0 +1,132 @@
+<script> {% include "./js/jquery.dataTables.min.js" %} </script>
+<script> {% include "./js/dataTables.jqueryui.min.js" %} </script>
+
+<script> {% include "./js/jszip.min.js" %} </script>
+<script> {% include "./js/dataTables.buttons.min.js" %} </script>
+<script> {% include "./js/buttons.flash.min.js" %} </script>
+<script> {% include "./js/buttons.html5.min.js" %} </script>
+<script> {% include "./js/buttons.print.min.js" %} </script>
+
+<style> {% include "./css/jquery-ui.css" %}</style>
+<style> {% include "./css/dataTables.jqueryui.min.css" %}</style>
+<style> {% include "./css/buttons.dataTables.min.css" %}</style>
+<script>
+    $(document).ready(function () {
+        var table = $('#accura_table').DataTable({
+            dom: 'Bfrtip',
+            buttons: ['excel']
+        });
+        table.columns(0).order('asc').draw();
+    });
+
+    $(document).ready(function () {
+            var table = $('#accura_table').DataTable();
+            var indexOfMyCol = 0 ;
+            var collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+    $("#accura_table thead th").each( function ( i ) {
+        if (i==indexOfMyCol){
+
+          var select = $('<select><option value=""></option></select>')
+            .appendTo( $(this).empty() )
+            .on( 'change', function () {
+                var pattern = ""
+                if ($(this).val()!="") {
+                    pattern= pattern="^"+$(this).val() +"$"
+                }
+                table.column( i )
+                .search(input=pattern, regex=true, smart=false)
+                .draw();
+            } );
+
+        table.column( i).data().unique().sort(collator.compare).each( function ( d, j ) {
+            select.append( '<option value="'+d+'">'+d+'</option>' )
+        } );
+    }
+    } );
+    });
+</script>
+
+
+
+
+    <div class="abc" style="float: left; margin-left: 15%; margin-right:15%; width: 70%" >
+      <h2>WellStatistics    <i class="fa fa-question-circle" onClick="toggle1(this)" style="cursor:pointer;"></i></h2>
+
+      <div class="box">
+        <div class="description" style="display: none;">
+          <p><b>well</b>: Well barcode sequence.</p>
+          <p><b>readcount</b>: total reads of the well.</p>
+          <p><b>UMI</b>: total UMI of the well.</p>
+          <p><b>gene</b>: total gene of the well.</p>
+      </div>
+        <table style="float: left; margin-left: 0%; margin-top: 5%; margin-right:3%; width: 47%">
+          {% for item in count_summary %}
+            <tr>
+              {% for i in item %} 
+              <td>{{ i|e }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </table>
+        
+        <div id="myDivMedianGeneNum" style="float: left; margin-left: 3%; margin-top: 1%; margin-right:0%; width: 47%">
+          <script>
+            var data = [{
+              x: {{ percentile|safe }},
+              y: {{ MedianGeneNum|safe }},
+              mode: 'lines'
+            }];
+            var layout = {
+                height: 313,
+                width: 400,
+                margin: {
+                    l: 45,
+                    r: 35,
+                    b: 30,
+                    t: 30,
+                },
+                title: 'Median Genes per Well',
+                xaxis: {
+                    title: 'Reads Fraction',
+                },
+                yaxis: {
+                    title: 'Median Genes per Well',
+                    rangemode: 'tozero',
+                },
+                showlegend: false,
+
+            };
+
+     //  Modebar Buttons names at https://github.com/plotly/plotly.js/blob/master/src/components/modebar/buttons.js
+     //  - sendDataToCloud 
+     //  - (2D): zoom2d, pan2d, select2d, lasso2d, zoomIn2d, zoomOut2d, autoScale2d, resetScale2d
+     //  - (Cartesian): hoverClosestCartesian, hoverCompareCartesian 
+     //  - (3D): zoom3d, pan3d, orbitRotation, tableRotation, handleDrag3d, resetCameraDefault3d, resetCameraLastSave3d, hoverClosest3d
+     //  - (Geo): zoomInGeo, zoomOutGeo, resetGeo, hoverClosestGeo
+     //  - hoverClosestGl2d, hoverClosestPie, toggleHover, resetViews 
+
+
+            var config = { 
+                "displayModeBar": true, 
+                "staticPlot": false, 
+                "showAxisDragHandles": false, 
+                "modeBarButtons": [["toImage", "resetScale2d"]], 
+                "scrollZoom": false,
+                "displaylogo": false, 
+            };
+            Plotly.newPlot('myDivMedianGeneNum', data, layout, config);
+          </script>
+        </div>
+
+
+        <hr />
+
+        <h3>Detailed information per Well</h3>
+        <div style=" margin-left: 3%; margin-right:3%;">
+            {{accura_count | safe}}
+        </div>
+
+
+        <div class="clear" ></div>
+      </div>
+    </div>
