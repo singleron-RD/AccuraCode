@@ -1,0 +1,3 @@
+recursive-include accuracode/templates/ *
+recursive-include accuracode/data/ *
+recursive-include accuracode/ *.R
