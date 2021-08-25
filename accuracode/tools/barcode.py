@@ -347,12 +347,15 @@ class Barcode(Step):
             lowQual = int(self.lowQual)
             # get linker and whitelist
             bc_pattern = __PATTERN_DICT__[chemistry]
-            if (bc_pattern):
-                (linker, whitelist) = get_scope_bc(chemistry)
-            else:
-                bc_pattern = self.pattern
-                linker = self.linker
+            if self.whitelist:
+                (linker, whitelist) = get_scope_bc('accuracode384')
                 whitelist = self.whitelist
+                if self.pattern:
+                    bc_pattern = self.pattern
+                if self.linker:
+                    linker = self.linker
+            elif (bc_pattern):
+                (linker, whitelist) = get_scope_bc(chemistry)
             if not bc_pattern:
                 raise Exception("invalid bc_pattern!")
 
