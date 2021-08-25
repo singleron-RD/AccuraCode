@@ -34,6 +34,26 @@ You can start your analysis by running:
 sh ./shell/{sample}.sh
 ```
 
+- part of AccuraCode 384
+	```
+	conda activate accuracode
+	multi_accura \
+ 	--mapfile ./mapfile \
+ 	--genomeDir /Database/genome/homo \
+ 	--thread 8 \
+ 	--mod shell \
+	--whitelist /path/to/wellbarcode/file
+	```
+
+If you use part of the wells, we recommend you set the "--whitelist" parameter and write the well barcodes you used into a wellbarcode file.
+
+The wellbarcoe file format is one barcode per line, eg:
+```
+AACGGACCT
+GACTGGTTG
+TCGGTTCGT
+GTCTTGCGT
+```
 
 ## How to write mapfile
 
