@@ -192,7 +192,7 @@ class Chemistry():
     @utils.add_log
     def get_chemistry(self, fq1):
         '''
-        'accuracode96': 'C8U12T18'
+        'accuracode96': 'C9U12T18'
         'accuracode384': 'C9U12T18'
         '''
         # init
