@@ -46,7 +46,7 @@ gunzip Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 gunzip Homo_sapiens.GRCh38.99.gtf.gz
 
 conda activate accuracode
-accuracode rna mkref \
+accuracode accura mkref \
  --genome_name Homo_sapiens_ensembl_99 \
  --fasta Homo_sapiens.GRCh38.dna.primary_assembly.fa \
  --gtf Homo_sapiens.GRCh38.99.gtf
@@ -65,7 +65,7 @@ gunzip Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
 gunzip Mus_musculus.GRCm38.99.gtf.gz
 
 conda activate accuracode
-accuracode rna mkref \
+accuracode accura mkref \
  --genome_name Mus_musculus_ensembl_99 \
  --fasta Mus_musculus.GRCm38.dna.primary_assembly.fa \
  --gtf Mus_musculus.GRCm38.99.gtf
