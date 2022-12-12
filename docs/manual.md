@@ -23,4 +23,4 @@ Currently, AccuraCode includes the follwing pipelines:
 - [star](accura/star.md)
 - [featureCounts](tools/featureCounts.md)
 - [count](tools/count.md)
-- [multi_rna](accura/multi_rna.md)
+- [multi_accura](accura/multi_accura.md)
