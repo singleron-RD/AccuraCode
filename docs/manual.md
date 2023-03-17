@@ -24,3 +24,4 @@ Currently, AccuraCode includes the follwing pipelines:
 - [featureCounts](tools/featureCounts.md)
 - [count](tools/count.md)
 - [multi_accura](accura/multi_accura.md)
+

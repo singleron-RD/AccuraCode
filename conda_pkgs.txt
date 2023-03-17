@@ -1,9 +1,8 @@
-python=3.8 
+python>=3.8 
 star=2.6.1b
 picard=2.18.17
 ucsc-gtftogenepred=377
 subread=2.0.1
 samtools=1.9
 bioconductor-dropletutils
-bcftools=1.9
-setuptools=58.2.0
+bcftools==1.9

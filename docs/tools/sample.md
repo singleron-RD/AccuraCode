@@ -1,5 +1,3 @@
-
-
 ## Arguments
 `--outdir` Output diretory.
 
@@ -9,9 +7,9 @@
 
 `--thread` Thread to use.
 
-`--debug` If this argument is used, celescope may output addtional file for debugging.
+`--debug` If this argument is used, accuracode may output addtional file for debugging.
 
-`--fq1` read1 fq file
+`--fq1` read1 fq file.
 
-`--chemistry` chemistry version
+`--chemistry` chemistry version.
 

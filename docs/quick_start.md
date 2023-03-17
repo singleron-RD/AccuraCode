@@ -27,6 +27,8 @@ Run `multi_{assay} -h` for help.
 
 `--mod` Create `sjm`(simple job manager https://github.com/StanfordBioinformatics/SJM) or `shell` scripts. 
 
+`--skip_umi_correct` For a large data set, users can set it to skip umi corretion to boost speed.
+
 Scripts above will generate a `shell` directory containing `{sample}.sh` files.
 
 You can start your analysis by running:
@@ -54,6 +56,9 @@ GACTGGTTG
 TCGGTTCGT
 GTCTTGCGT
 ```
+
+
+
 
 ## How to write mapfile
 

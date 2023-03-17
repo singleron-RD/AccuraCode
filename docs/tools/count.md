@@ -1,36 +1,17 @@
-## Features
-- Get read/UMI/gene counts for each well barcode.
-
-- Generate expression matrix.
-
-## Output
-- `{sample}_matrix.tsv.gz` The expression matrix of the well barcode, separated by tabs.
-
-- `{sample}_count_detail.txt.gz` 4 columns:
-    - barcode
-    - gene ID
-    - UMI count
-    - read_count
-
-- `{sample}_counts.txt` 6 columns:
-    - well: Well barcode sequence
-    - readcount: read count of each well barcode
-    - UMI: UMI count for each well barcode
-    - gene: gene count for each well barcode
-
-- `{sample}_downsample.txt` 2 columns：
-    - percent: percentage of sampled reads
-    - median_geneNum: median gene number per cell
-
-
-
-
 ## Arguments
 `--genomeDir` Required. Genome directory.
 
-`--chemistry` Required. Default 'accuracode384'.
+`--chemistry` Predefined (pattern, barcode whitelist, linker whitelist) combinations. Can be one of:
+- `accuracode96` Used for AccuraCode96 libraries.
+- `accuracode384` Used for AccuraCode384 libraries.
+- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist` and  `linker` at the
+same time.
 
 `--whitelist` Cell barcode whitelist file path, one cell barcode per line.
+
+`--UMI_cutoff` UMI cutoff for output, default 500.
+
+`--skip_umi_correct` For big data to skip umi correct.
 
 `--outdir` Output diretory.
 
@@ -43,5 +24,4 @@
 `--debug` If this argument is used, accuracode may output addtional file for debugging.
 
 `--bam` Required. BAM file from featureCounts.
-
 

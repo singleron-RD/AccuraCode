@@ -692,3 +692,10 @@ def sort_bam(input_bam, output_bam, threads=1):
 def index_bam(input_bam):
     cmd = f"samtools index {input_bam}"
     subprocess.check_call(cmd, shell=True)
+
+def get_assay_text(assay):
+    """
+    add AccuraCode prefix
+    """
+    return 'AccuraCode ' + assay
+

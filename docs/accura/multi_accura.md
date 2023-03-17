@@ -1,15 +1,15 @@
-
-
+## Features
+## Output files
 ## Arguments
-`--mod` mod, sjm or shell
+`--mod` mod, sjm or shell.
 
 `--mapfile` tsv file, 4 columns:
                 1st col: LibName;
                 2nd col: DataDir;
                 3rd col: SampleName;
-                4th col: optional;
+                4th col: optional;.
 
-`--rm_files` remove redundant fq.gz and bam after running
+`--rm_files` remove redundant fq.gz and bam after running.
 
 `--steps_run` Steps to run. Multiple Steps are separated by comma.
 
@@ -17,22 +17,14 @@
 
 `--thread` Thread to use.
 
-`--debug` If this argument is used, celescope may output addtional file for debugging.
-
-`--chemistry` Predefined (pattern, barcode whitelist, linker whitelist) combinations. Can be one of:  
-- `accuracode384` Default value. Used for Singleron AccuraCode 384 wells libraries.  
-- `accuracode96` Used for Singleron AccuraCode 96 wells libraries.  
-- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist` and `linker` at the 
-same time.
+`--debug` If this argument is used, accuracode may output addtional file for debugging.
 
 `--pattern` The pattern of R1 reads, e.g. `C9U12T18`. The number after the letter represents the number 
         of bases.  
 - `C`: cell barcode  
-- `L`: linker(common sequences)  
+- `L`: linker(common sequences, can be absent in pattern design)  
 - `U`: UMI    
-- `T`: poly T
-
-`--whitelist` Cell barcode whitelist file path, one cell barcode per line.
+- `T`: poly T.
 
 `--linker` Linker whitelist file path, one linker per line.
 
@@ -72,15 +64,27 @@ at least {overlap} bases match between adapter and read.
 `--outFilterMatchNmin` Default `0`. Alignment will be output only if the number of matched bases 
 is higher than or equal to this value.
 
-`--out_unmapped` Output unmapped reads
+`--out_unmapped` Output unmapped reads.
 
-`--STAR_param` Other STAR parameters
+`--STAR_param` Other STAR parameters.
 
 `--outFilterMultimapNmax` Default `1`. How many places are allowed to match a read at most.
 
 `--starMem` Default `30`. Maximum memory that STAR can use.
 
-`--gtf_type` Specify feature type in GTF annotation
+`--gtf_type` Specify feature type in GTF annotation.
 
 `--genomeDir` Required. Genome directory.
+
+`--chemistry` Predefined (pattern, barcode whitelist, linker whitelist) combinations. Can be one of:
+- `accuracode96` Used for AccuraCode96 libraries.
+- `accuracode384` Used for AccuraCode384 libraries.
+- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist` and  `linker` at the
+same time.
+
+`--whitelist` Cell barcode whitelist file path, one cell barcode per line.
+
+`--UMI_cutoff` UMI cutoff for output, default 500.
+
+`--skip_umi_correct` For big data to skip umi correct.
 

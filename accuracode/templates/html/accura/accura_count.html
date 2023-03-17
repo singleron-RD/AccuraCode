@@ -14,9 +14,10 @@
     $(document).ready(function () {
         var table = $('#accura_table').DataTable({
             dom: 'Bfrtip',
-            buttons: ['excel']
+            buttons: ['excel'],
+            "aaSorting": []
         });
-        table.columns(0).order('asc').draw();
+        table.draw();
     });
 
     $(document).ready(function () {

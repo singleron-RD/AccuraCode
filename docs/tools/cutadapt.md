@@ -1,13 +1,3 @@
-## Features
-- Trim adapters in R2 reads with cutadapt. Default adapters includes:
-    - polyT=A{18}, 18 A bases. 
-    - p5=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA, Illumina p5 adapter.
-
-## Output
-- `cutadapt.log` Cutadapt output log file.
-- `{sample}_clean_2.fq.gz` R2 reads file without adapters.
-
-
 ## Arguments
 `--adapter_fasta` Addtional adapter fasta file.
 
@@ -30,7 +20,7 @@ at least {overlap} bases match between adapter and read.
 
 `--fq` Required. R2 reads from step Barcode.
 
-`--gzip` Output gzipped fastq
+`--gzip` Output gzipped fastq.
 
 `--outdir` Output diretory.
 
@@ -40,5 +30,5 @@ at least {overlap} bases match between adapter and read.
 
 `--thread` Thread to use.
 
-`--debug` If this argument is used, celescope may output addtional file for debugging.
+`--debug` If this argument is used, accuracode may output addtional file for debugging.
 

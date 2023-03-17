@@ -2,7 +2,7 @@
 count step
 """
 
-import os
+import os,sys
 import random
 #import subprocess
 #import sys
@@ -39,11 +39,14 @@ class Count(Step):
         - UMI count  
         - read_count  
 
-    - `{sample}_counts.txt` 6 columns:
-        - well: Well barcode sequence
+    - `{sample}_counts.txt` 5 columns:
+        - well: Oligo id
+        - Barcode: Well barcode sequence
         - readcount: read count of each well barcode
         - UMI: UMI count for each well barcode
         - gene: gene count for each well barcode
+
+    - `{sample}_counts_raw.txt`, same as {sample}_counts.txt, including all wells without UMI filter.
 
     - `{sample}_downsample.txt` 2 columns：
         - percent: percentage of sampled reads
@@ -54,8 +57,12 @@ class Count(Step):
 
     def __init__(self, args, step):
         Step.__init__(self, args, step)
-        if args.whitelist:
-            self.wellFile = args.whitelist
+        if args.chemistry == 'customized':
+            if args.whitelist:
+                self.wellFile = args.whitelist
+            else:
+                print('Customized chemistry must provide whitelist, please check files.')
+                sys.exit(1)
         else:
             self.wellFile = self.get_scope_bcwell(args.chemistry)
         self.bam = args.bam
@@ -63,11 +70,17 @@ class Count(Step):
         # set
         self.gtf_file = parse_genomeDir_rna(args.genomeDir)['gtf']
         self.id_name = utils.get_id_name_dict(self.gtf_file)
-        self.well_name = self.bc2well(self.wellFile) 
+        self.well_name = self.bc2well(self.wellFile)
+        self.umi_cutoff = args.UMI_cutoff
+        if args.skip_umi_correct:
+            self.umi_correct = False
+        else:
+            self.umi_correct = True
 
         # output files
         self.count_detail_file = f'{self.outdir}/{self.sample}_count_detail.txt'
         self.marked_count_file = f'{self.outdir}/{self.sample}_counts.txt'
+        self.raw_count_file = f'{self.outdir}/{self.sample}_counts_raw.txt'
         self.matrix_file = f'{self.outdir}/{self.sample}_matrix.tsv.gz'
         self.stat_file = f'{self.outdir}/stat.txt'
         self.downsample_file = f'{self.outdir}/{self.sample}_downsample.txt'
@@ -77,18 +90,21 @@ class Count(Step):
         df = pd.read_table(self.count_detail_file, header=0)
 
         # df_sum
-        #Count.get_df_sum(df,self.well_name, self.marked_count_file, self.stat_file)
-        Count.get_df_sum(df, self.marked_count_file, self.stat_file)
+        Count.get_df_sums(df, self.well_name, self.raw_count_file, self.marked_count_file, self.stat_file, self.umi_cutoff)
+        #Count.get_df_sum(df, self.marked_count_file, self.stat_file)
 
         # output matrix
-        self.exp_matrix(df, self.matrix_file)
+        self.exp_matrix(df, self.matrix_file, self.well_name)
 
         # summary
         tbltxt = pd.read_csv(self.marked_count_file,header=0,sep="\t")
+        keep_bc = tbltxt['Barcode'].to_list()
+        tbltxt.drop(columns='Barcode',inplace=True)
         tbldiv = self.stat_table(tbltxt)
 
         # downsampling
-        res_dict = self.downsample(df)
+        df_ds = df[df['Barcode'].isin(keep_bc)]
+        res_dict = self.downsample(df_ds)
 
         # report
         self.report_prepare(tbldiv)
@@ -166,8 +182,9 @@ class Count(Step):
                         continue
                     gene_id = seg.get_tag('XT')
                     gene_umi_dict[gene_id][umi] += 1
-                for gene_id in gene_umi_dict:
-                    Count.correct_umi(gene_umi_dict[gene_id])
+                if self.umi_correct:
+                    for gene_id in gene_umi_dict:
+                        Count.correct_umi(gene_umi_dict[gene_id])
 
                 # output
                 for gene_id in gene_umi_dict:
@@ -182,42 +199,56 @@ class Count(Step):
         wells = {}
         with open(bc_well_file) as f:
             for i in f:
-                wells[i.strip()] = 1
+                ii= i.strip().split()
+                if len(ii) == 1:
+                    wells[ii[0]] = ii[0]
+                else:
+                    wells[ii[0]] = ii[1]
         return wells
 
 
     @staticmethod
-    #def get_df_sum(df, id_name, marked_count_file, stat_file, col='UMI'):
-    def get_df_sum(df,  marked_count_file, stat_file, col='UMI'):
+    def get_df_sums(df, well_name, raw_count_file, marked_count_file, stat_file, umi_cutoff, col='UMI'):
+    #def get_df_sum(df,  marked_count_file, stat_file, col='UMI'):
 
-        df_sum = df.groupby('Barcode').agg({
+        def format_int(number):
+            if isinstance (number,(int,float)):
+                return str("{:,}".format(round(number)))
+            else:
+                return number
+
+        df_sum_raw = df.groupby('Barcode').agg({
             'count': 'sum',
             'UMI': 'count',
             'geneID': 'nunique'
         })
-        df_sum.columns = ['readcount', 'UMI', 'gene']
-        df_sum = df_sum.sort_values(col, ascending=False)
 
-        def format_int(number):
-            return str("{:,}".format(round(number)))
+        df_sum_raw.columns = ['readcount', 'UMI', 'gene']
+        df_sum_raw = df_sum_raw.sort_values(col, ascending=False)
+        id1 = df_sum_raw.index.to_series()
+        name = id1.apply(lambda x: well_name[x])
+        df_sum_raw.reset_index(inplace=True)
+        df_sum_raw.index = name
+        df_sum_raw.index.name = "well"
+
+        df_sum = df_sum_raw[df_sum_raw['UMI']>=umi_cutoff]
 
         stat_header=['Median Reads per Well','Median UMI per Well','Median Genes per Well','Mean Reads per Well','Mean UMI per Well','Mean Genes per Well']
         stat_info=[format_int(df_sum['readcount'].median()), format_int(df_sum['UMI'].median()), format_int(df_sum['gene'].median()), format_int(df_sum['readcount'].mean()), format_int(df_sum['UMI'].mean()), format_int(df_sum['gene'].mean())]
         df_stat = pd.DataFrame({"item": stat_header, "count": stat_info})
         df_stat.to_csv(stat_file, sep=":", header=None, index=False)
 
-        df_sum = df_sum.applymap(lambda x: format(x,','))
-        #id1 = df_sum.index.to_series()
-        #name = id1.apply(lambda x: id_name[x])
-        #df_sum.index = name
-        df_sum.index.name = "well"
+        df_sum_raw = df_sum_raw.applymap(lambda x: format_int(x))
+        df_sum = df_sum.applymap(lambda x: format_int(x))
         #df_sum = df_sum.sort_index(axis=0, ascending=True)
+        df_sum_raw.to_csv(raw_count_file, sep='\t')
         df_sum.to_csv(marked_count_file, sep='\t')
 
 
 
     @utils.add_log
-    def exp_matrix(self, df,  matrix_table_file):
+    def exp_matrix(self, df,  matrix_table_file, well_name):
+    #def exp_matrix(self, df,  matrix_table_file):
         table = df.pivot_table(
                 index='geneID', columns='Barcode', values='UMI',
                 aggfunc=len).fillna(0).astype(int)
@@ -227,10 +258,10 @@ class Count(Step):
         name = id1.apply(lambda x: self.id_name[x])
         table.index = name
         table.index.name = ""
-        #bc = table.columns.to_series()
-        #sample = bc.apply(lambda x: self.well_name[x])
-        #table.columns= sample
-        #table = table.sort_index(axis=1, ascending=True)
+        bc = table.columns.to_series()
+        sample = bc.apply(lambda x: well_name[x])
+        table.columns= sample
+        table = table.sort_index(axis=1, ascending=True)
 
         table.to_csv(
             matrix_table_file,
@@ -249,7 +280,7 @@ class Count(Step):
     def get_scope_bcwell(self,chemistry):
         import accuracode
         root_path = os.path.dirname(accuracode.__file__)
-        bcwell_f = f'{root_path}/data/chemistry/{chemistry}/bclist'
+        bcwell_f = f'{root_path}/data/chemistry/{chemistry}/bcwell'
         return bcwell_f
 
 
@@ -326,6 +357,13 @@ same time.""",
         '--whitelist',
         help='Cell barcode whitelist file path, one cell barcode per line.'
     )
+
+    parser.add_argument(
+        '--UMI_cutoff', default=500, type=int,
+        help='UMI cutoff for output, default 500.'
+    )
+
+    parser.add_argument("--skip_umi_correct", help="Skip umi correction", action='store_true')
 
     if sub_program:
         parser = s_common(parser)
