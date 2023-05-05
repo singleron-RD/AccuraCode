@@ -17,6 +17,6 @@ HELP_DICT = {
     'thread': 'Thread to use.',
     'debug': 'If this argument is used, accuracode may output addtional file for debugging.',
     'fasta': 'Required. Genome fasta file. Use relative path to `genomeDir`.',
-    'outdir': 'Output directory.'
+    'outdir': 'Output directory.',
     'chemistry': 'You need to explicitly use `--chemistry accuracode96 or accuracode384 (default)`. `--chemistry customized` is used for user defined combinations that you need to provide `--pattern`, `--whitelist` and `--linker` at the same time.'
 }
