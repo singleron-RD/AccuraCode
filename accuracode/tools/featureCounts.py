@@ -37,6 +37,7 @@ class FeatureCounts(Step):
 
         # set
         self.gtf = parse_genomeDir_rna(self.args.genomeDir)['gtf']
+        self.strand_count = self.args.strand_count
 
         # out files
         input_basename = os.path.basename(self.args.input)
@@ -80,7 +81,7 @@ class FeatureCounts(Step):
     def run_featureCounts(self):
         cmd = (
             'featureCounts '
-            '-s 1 '
+            f'-s {self.strand_count} '
             f'-a {self.gtf} '
             f'-o {self.out_prefix} '  # not bam
             '-R BAM '
@@ -154,6 +155,7 @@ def get_opts_featureCounts(parser, sub_program):
         default='exon'
     )
     parser.add_argument('--genomeDir', help='Required. Genome directory.')
+    parser.add_argument('--strand_count', help='Perform strand-specific read counting', default='1')
     if sub_program:
         parser.add_argument('--input', help='Required. BAM file path.', required=True)
         parser = s_common(parser)
