@@ -1,6 +1,6 @@
 """barcode step."""
 
-import glob
+#import glob
 import os
 import re
 import sys
@@ -10,6 +10,7 @@ from itertools import combinations, product
 import pysam
 from xopen import xopen
 
+import accuracode
 import accuracode.tools.utils as utils
 from accuracode.tools.__init__ import __PATTERN_DICT__
 from accuracode.tools.step import Step, s_common
@@ -44,9 +45,8 @@ def parse_pattern(pattern):
 
 
 def get_scope_bc(chemistry):
-    import accuracode
     root_path = os.path.dirname(accuracode.__file__)
-    linker_f = glob.glob(f'{root_path}/data/chemistry/{chemistry}/linker*')[0]
+    linker_f = None
     whitelist_f = f'{root_path}/data/chemistry/{chemistry}/bclist'
     return linker_f, whitelist_f
 
@@ -168,88 +168,6 @@ def check_seq_mismatch(seq_list, correct_set_list, mismatch_dict_list):
     return bool_valid, bool_corrected, corrected_seq
 
 
-class Chemistry():
-    """
-    Auto detect chemistry from read 1
-    """
-
-    def __init__(self, fq1):
-        self.fq1 = fq1
-        self.fq1_list = fq1.split(',')
-        self.nRead = 10000
-
-    @utils.add_log
-    def check_chemistry(self):
-        chemistry_list = []
-        for fastq1 in self.fq1_list:
-            print(fastq1)
-            chemistry = self.get_chemistry(fastq1)
-            chemistry_list.append(chemistry)
-        if len(set(chemistry_list)) != 1:
-            Chemistry.check_chemistry.logger.warning('multiple chemistry found!' + str(chemistry_list))
-        return chemistry_list
-
-    @utils.add_log
-    def get_chemistry(self, fq1):
-        '''
-        'accuracode96': 'C9U12T18'
-        'accuracode384': 'C9U12T18'
-        '''
-        # init
-        linker_4_file, _whitelist = get_scope_bc('accuracode384')
-        linker_4_list, _num = utils.read_one_col(linker_4_file)
-        linker_4_dict = defaultdict(int)
-        linker_wrong_dict = defaultdict(int)
-        pattern_dict = parse_pattern('C9U12T18')
-        T4_n = 0
-        L57C_n = 0
-
-        with pysam.FastxFile(fq1) as fh:
-            for _ in range(self.nRead):
-                entry = fh.__next__()
-                seq = entry.sequence
-                L57C = seq[21]
-                if L57C == 'C':
-                    L57C_n += 1
-                T4 = seq[21:25]
-                if T4 == 'TTTT':
-                    T4_n += 1
-                linker = seq_ranges(seq, pattern_dict=pattern_dict['L'])
-                if linker in linker_4_list:
-                    linker_4_dict[linker] += 1
-                else:
-                    linker_wrong_dict[linker] += 1
-
-        percent_T4 = T4_n / self.nRead
-        percent_L57C = L57C_n / self.nRead
-        Chemistry.get_chemistry.logger.info(f'percent T4: {percent_T4}')
-        Chemistry.get_chemistry.logger.info(f'percent L57C: {percent_L57C}')
-        if percent_T4 > 0.5:
-            chemistry = 'scopeV2.0.1'
-        else:
-            # V2.1.1 or V2.2.1 or failed
-            valid_linker_type = 0
-            for linker in linker_4_dict:
-                linker_4_dict[linker] = linker_4_dict[linker] / self.nRead
-                if linker_4_dict[linker] > 0.05:
-                    valid_linker_type += 1
-            Chemistry.get_chemistry.logger.info(linker_4_dict)
-            if valid_linker_type == 0:
-                print(linker_wrong_dict)
-                raise Exception(
-                    'Auto chemistry detection failed! '
-                    'If the sample is from Singleron, ask the technical staff you are connecting with for the chemistry used. '
-                )
-            elif valid_linker_type == 1:
-                chemistry = 'scopeV2.1.1'
-            elif valid_linker_type < 4:
-                chemistry = 'scopeV2.2.1'
-                Chemistry.get_chemistry.logger.warning(
-                    f'chemistry scopeV2.2.1 only has {valid_linker_type} linker types!')
-            else:
-                chemistry = 'scopeV2.2.1'
-        Chemistry.get_chemistry.logger.info(f'chemistry: {chemistry}')
-        return chemistry
 
 
 class Barcode(Step):
@@ -345,19 +263,22 @@ class Barcode(Step):
             lowNum = int(self.lowNum)
             Barcode.run.logger.info(f'lowQual score: {self.lowQual}')
             lowQual = int(self.lowQual)
-            # get linker and whitelist
-            bc_pattern = __PATTERN_DICT__[chemistry]
-            if self.whitelist:
-                (linker, whitelist) = get_scope_bc('accuracode384')
-                whitelist = self.whitelist
-                if self.pattern:
-                    bc_pattern = self.pattern
-                if self.linker:
-                    linker = self.linker
-            elif (bc_pattern):
-                (linker, whitelist) = get_scope_bc(chemistry)
+
+            # get pattern and whitelist
+            bc_pattern, whitelist, linker = None, None, None
+            if self.pattern:
+                bc_pattern = self.pattern
+            else:
+                bc_pattern = __PATTERN_DICT__[chemistry]
             if not bc_pattern:
                 raise Exception("invalid bc_pattern!")
+
+            if chemistry in ['accuracode96', 'accuracode384']:
+                (linker, whitelist) = get_scope_bc(chemistry)
+            if self.whitelist:
+                whitelist = self.whitelist
+            if self.linker:
+                linker = self.linker
 
             # parse pattern to dict, C8L10C8L10C8U8
             # defaultdict(<type 'list'>, {'C': [[0, 8], [18, 26], [36, 44]], 'U':
@@ -511,7 +432,7 @@ def get_opts_barcode(parser, sub_program=True):
         help="""Predefined (pattern, barcode whitelist, linker whitelist) combinations. Can be one of:  
 - `accuracode96` Used for AccuraCode96 libraries.  
 - `accuracode384` Used for AccuraCode384 libraries.  
-- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist`, `linker` and `wellFile` at the 
+- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist` and `linker`(Not required if not designed in pattern) at the 
 same time.""",
         choices=list(__PATTERN_DICT__.keys()),
         default='accuracode384'
@@ -527,7 +448,7 @@ same time.""",
     )
     parser.add_argument(
         '--whitelist',
-        help='Cell barcode whitelist file path, one cell barcode per line.'
+        help='Cell barcode whitelist file path, one cell barcode per line or two columns(`barcode reportname`) per line.'
     )
     parser.add_argument(
         '--linker',

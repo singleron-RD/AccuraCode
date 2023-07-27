@@ -82,7 +82,7 @@ is higher than or equal to this value.
 - `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist` and  `linker` at the
 same time.
 
-`--whitelist` Cell barcode whitelist file path, one cell barcode per line.
+`--whitelist` Cell barcode whitelist file path, one cell barcode per line or two columns(`barcode reportname`) per line.
 
 `--UMI_cutoff` UMI cutoff for output, default 500.
 

@@ -57,6 +57,13 @@ TCGGTTCGT
 GTCTTGCGT
 ```
 
+or two columns per line (2nd col showed in report and final matrix), eg:
+```
+AACGGACCT	A01
+GACTGGTTG	A02
+TCGGTTCGT	B01
+GTCTTGCGT	B02
+```
 
 
 

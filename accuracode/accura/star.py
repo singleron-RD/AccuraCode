@@ -127,18 +127,17 @@ class Star_rna(Step, StarMixin):
 
     @utils.add_log
     def picard(self):
-        cmd = [
-            'picard',
-            '-Xmx20G',
-            '-XX:ParallelGCThreads=4',
-            'CollectRnaSeqMetrics',
-            'I=%s' % (self.STAR_bam),
-            'O=%s' % (self.picard_region_log),
-            'REF_FLAT=%s' % (self.refflat),
-            'STRAND=NONE',
-            'VALIDATION_STRINGENCY=SILENT']
-        cmd_str = ' '.join(cmd)
-        Star_rna.picard.logger.info(cmd_str)
+        cmd = (
+            'picard -Dpicard.useLegacyParser=false '
+            '-Xmx20G '
+            '-XX:ParallelGCThreads=4 '
+            'CollectRnaSeqMetrics '
+            f'-I {self.STAR_bam} '
+            f'-O {self.picard_region_log} '
+            f'-REF_FLAT {self.refflat} '
+            '-STRAND NONE '
+            '-VALIDATION_STRINGENCY SILENT ')
+        Star_rna.picard.logger.info(cmd)
         subprocess.check_call(cmd)
 
     @utils.add_log

@@ -5,7 +5,6 @@ import pandas as pd
 import accuracode.tools.utils as utils
 from accuracode.__init__ import __VERSION__, ASSAY_DICT
 from accuracode.tools.__init__ import __PATTERN_DICT__
-from accuracode.tools.barcode import Chemistry
 from accuracode.tools.step import Step, s_common
 
 
@@ -23,13 +22,7 @@ def sample(args):
     chemistry = args.chemistry
 
     # get chemistry
-    if chemistry == 'auto':
-        fq1 = args.fq1
-        ch = Chemistry(fq1)
-        chemistry = ch.check_chemistry()
-        chemistry = ",".join(set(chemistry))
-    else:
-        chemistry = args.chemistry
+    chemistry = args.chemistry
 
     if not os.path.exists(outdir):
         os.system('mkdir -p %s' % outdir)

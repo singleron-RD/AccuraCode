@@ -48,7 +48,7 @@ class Count(Step):
 
     - `{sample}_counts_raw.txt`, same as {sample}_counts.txt, including all wells without UMI filter.
 
-    - `{sample}_downsample.txt` 2 columns：
+    - `{sample}_downsample.txt` 2 columns:
         - percent: percentage of sampled reads
         - median_geneNum: median gene number per cell
 
@@ -301,7 +301,7 @@ class Count(Step):
         # gene median
         df_cell_subsample = df_cell.loc[index_dedup, ]
         geneNum_median = float(df_cell_subsample.groupby(
-            'Barcode').agg({'geneID': 'nunique'}).median())
+            'Barcode').agg({'geneID': 'nunique'}).median().iloc[0])
 
         return geneNum_median
 
@@ -344,10 +344,10 @@ def count(args):
 def get_opts_count(parser, sub_program):
     parser.add_argument('--genomeDir', help='Required. Genome directory.')
     parser.add_argument('--chemistry', 
-        help="""Predefined (pattern, barcode whitelist, linker whitelist) combinations. Can be one of:
-- `accuracode96` Used for AccuraCode96 libraries.
-- `accuracode384` Used for AccuraCode384 libraries.
-- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist` and  `linker` at the
+        help="""Predefined (pattern, barcode whitelist, linker whitelist) combinations. Can be one of:  
+- `accuracode96` Used for AccuraCode96 libraries.  
+- `accuracode384` Used for AccuraCode384 libraries.  
+- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist` and `linker`(Not required if not designed in pattern) at the 
 same time.""",
         choices=list(__PATTERN_DICT__.keys()),
         default='accuracode384'
@@ -355,7 +355,7 @@ same time.""",
 
     parser.add_argument(
         '--whitelist',
-        help='Cell barcode whitelist file path, one cell barcode per line.'
+        help='Cell barcode whitelist file path, one cell barcode per line or two columns(`barcode reportname`) per line.'
     )
 
     parser.add_argument(

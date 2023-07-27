@@ -18,16 +18,21 @@ git clone https://github.com/singleron-RD/AccuraCode.git
 ```
 
 2. Install conda packages
+
+Create conda environment and install conda packages. It is recommended to use mamba (which is a faster replacement for Conda):
 ```
+conda install mamba
 cd AccuraCode
-conda create -n accuracode
-conda activate accuracode
-conda install -y --file conda_pkgs.txt --channel conda-forge --channel bioconda --channel r --channel imperial-college-research-computing
+mamba create -n accuracode -y --file conda_pkgs.txt
 ```
 
-3. Install accuracode
+3. Install python packages and accuracode
+
+Users can specify a mirror source by using the `-i` parameter to speed up the download and installation of packages.
 ```
-python setup.py install
+conda activate accuracode
+pip install -r requirements.txt [ -i https://pypi.tuna.tsinghua.edu.cn/simple ]
+python -m pip install .
 ```
 
 

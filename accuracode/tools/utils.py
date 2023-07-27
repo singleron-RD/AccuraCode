@@ -322,7 +322,7 @@ def seq_ranges(seq, pattern_dict):
 
 
 def read_one_col(file):
-    df = pd.read_csv(file, header=None)
+    df = pd.read_csv(file, header=None, sep="\t")
     col1 = list(df.iloc[:, 0])
     num = len(col1)
     return col1, num

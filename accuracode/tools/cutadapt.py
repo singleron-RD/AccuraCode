@@ -52,12 +52,12 @@ class Cutadapt(Step):
 
     def format_and_write_stat(self, cutadapt_log):
         # Total reads processed:...Total written (filtered):
-        start_line = 9
-        end_line = 16
+        start_line = 7
+        end_line = 17
         useful_content = islice(cutadapt_log.split('\n'), start_line, end_line)
         p_list = []
         for line_index, line in enumerate(useful_content):
-            if line.strip() == '':
+            if line.strip() == '' or line.strip().startswith("="):
                 continue
             line = re.sub(r'\s{2,}', r'', line)
             line = re.sub(r' bp', r'', line)
@@ -66,19 +66,20 @@ class Cutadapt(Step):
             attr = line.split(":")
             if len(attr) < 2:
                 raise Exception(
-                    'May caused by cutadapt version != 1.1.7. '
+                    'May caused by cutadapt version. '
                     f'Check version in {self.outdir}/cutadapt.log\n'
                     f'cutadapt log error at line {line_index + start_line}:\n'
                     f'{line}'
                 )
             p_list.append({"item": attr[0], "value": attr[1]})
         p_df = pd.DataFrame(p_list)
-        p_df.iloc[0, 0] = 'Reads with Adapters'
-        p_df.iloc[1, 0] = 'Reads too Short'
-        p_df.iloc[2, 0] = 'Reads Written'
-        p_df.iloc[3, 0] = 'Base Pairs Processed'
-        p_df.iloc[4, 0] = 'Base Pairs Quality-Trimmed'
-        p_df.iloc[5, 0] = 'Base Pairs Written'
+        p_df.iloc[0, 0] = 'Total reads processed'
+        p_df.iloc[1, 0] = 'Reads with adapters'
+        p_df.iloc[2, 0] = 'Reads too Short'
+        p_df.iloc[3, 0] = 'Reads Written'
+        p_df.iloc[4, 0] = 'Base Pairs Processed'
+        p_df.iloc[5, 0] = 'Base Pairs Quality-Trimmed'
+        p_df.iloc[6, 0] = 'Base Pairs Written'
         p_df.to_csv(self.stat_file, sep=':', index=False, header=None)
 
     @utils.add_log
