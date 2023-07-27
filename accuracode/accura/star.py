@@ -138,7 +138,7 @@ class Star_rna(Step, StarMixin):
             '-STRAND NONE '
             '-VALIDATION_STRINGENCY SILENT ')
         Star_rna.picard.logger.info(cmd)
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, shell=True)
 
     @utils.add_log
     def run(self):
