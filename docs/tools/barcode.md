@@ -2,7 +2,7 @@
 `--chemistry` Predefined (pattern, barcode whitelist, linker whitelist) combinations. Can be one of:  
 - `accuracode96` Used for AccuraCode96 libraries.  
 - `accuracode384` Used for AccuraCode384 libraries.  
-- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist`, `linker` and `wellFile` at the 
+- `customized` Used for user defined combinations. You need to provide `pattern`, `whitelist`, `linker`(if designed) at the 
 same time.
 
 `--pattern` The pattern of R1 reads, e.g. `C9U12T18`. The number after the letter represents the number 
