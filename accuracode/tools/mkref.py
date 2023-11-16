@@ -1,3 +1,5 @@
+import os
+
 import abc
 import configparser
 
@@ -13,7 +15,8 @@ def parse_genomeDir(genomeDir, entrys=None):
     if entrys:
         for entry in entrys:
             if entry in genome and genome[entry] != 'None':
-                genome[entry] = f'{genomeDir}/{genome[entry]}'
+                if not os.path.isabs(genome[entry]):
+                    genome[entry] = f'{genomeDir}/{genome[entry]}'
             else:
                 genome[entry] = "None"
     return genome
