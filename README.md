@@ -4,6 +4,10 @@ AccuraCode is a bioinfomatics analysis pipeline developed at Singleron to proces
 
 Detailed docs can be found in [manual](./docs/manual.md).
 
+## NOTICE: Repository No Longer Maintained
+
+Accuracode is no longer actively maintained. We recommend switching to [Celescope](https://github.com/singleron-RD/CeleScope) [bulk_rna assay](https://github.com/singleron-RD/CeleScope/blob/master/doc/assay/multi_bulk_rna.md).
+
 ## Hardware/Software Requirements
 
 - minimum 32GB RAM(to run STAR aligner)
